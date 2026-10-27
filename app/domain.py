@@ -3,10 +3,12 @@ from decimal import Decimal
 from enum import Enum
 from datetime import datetime, timezone
 
+
 class DomainException(Exception): pass
 class InvalidOrderData(DomainException): pass
 class InvalidOrderTransition(DomainException): pass
 class OrderItemLimitExceeded(DomainException): pass
+
 
 @dataclass(frozen=True)
 class Money:
@@ -22,11 +24,17 @@ class Money:
             raise InvalidOrderData("Monedas distintas")
         return Money(self.amount + other.amount, self.currency)
 
+
 @dataclass(frozen=True)
 class Customer:
     id: str
     is_vip: bool = False
     active: bool = True
+
+    def __post_init__(self):
+        if not self.id.strip():
+            raise InvalidOrderData("Cliente inválido")
+
 
 @dataclass(frozen=True)
 class OrderItem:
@@ -42,6 +50,7 @@ class OrderItem:
     def subtotal(self):
         return Money(self.unit_price.amount * self.quantity)
 
+
 class OrderStatus(str, Enum):
     DRAFT = "DRAFT"
     CONFIRMED = "CONFIRMED"
@@ -49,6 +58,7 @@ class OrderStatus(str, Enum):
     DELIVERED = "DELIVERED"
     CANCELLED = "CANCELLED"
     RETURNED = "RETURNED"
+
 
 @dataclass(frozen=True)
 class DomainEvent:
@@ -58,6 +68,7 @@ class DomainEvent:
         default_factory=lambda: datetime.now(timezone.utc)
     )
 
+
 @dataclass
 class Order:
     customer: Customer
@@ -66,6 +77,10 @@ class Order:
     status: OrderStatus = OrderStatus.DRAFT
     items: list[OrderItem] = field(default_factory=list)
     events: list = field(default_factory=list)
+
+    def __post_init__(self):
+        if not self.id.strip():
+            raise InvalidOrderData("Pedido inválido")
 
     @property
     def units(self):

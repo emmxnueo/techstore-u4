@@ -1,55 +1,81 @@
 from decimal import Decimal
 
+
 class Specification:
     def is_satisfied_by(self, order):
         raise NotImplementedError
 
     def __and__(self, other):
         return AndSpec(self, other)
+
     def __or__(self, other):
         return OrSpec(self, other)
+
     def __invert__(self):
         return NotSpec(self)
+
 
 class AndSpec(Specification):
     def __init__(self, left, right):
         self.left, self.right = left, right
+
     def is_satisfied_by(self, order):
         return (self.left.is_satisfied_by(order)
                 and self.right.is_satisfied_by(order))
 
+
 class OrSpec(Specification):
     def __init__(self, left, right):
         self.left, self.right = left, right
+
     def is_satisfied_by(self, order):
         return (self.left.is_satisfied_by(order)
                 or self.right.is_satisfied_by(order))
 
+
 class NotSpec(Specification):
     def __init__(self, spec):
         self.spec = spec
+
     def is_satisfied_by(self, order):
         return not self.spec.is_satisfied_by(order)
+
 
 class MinimumAmountSpec(Specification):
     def __init__(self, minimum):
         self.minimum = minimum
+
     def is_satisfied_by(self, order):
         return order.total.amount > self.minimum
+
 
 class VIPCustomerSpec(Specification):
     def is_satisfied_by(self, order):
         return order.customer.is_vip
 
+
 class MinimumUnitsSpec(Specification):
     def __init__(self, minimum):
         self.minimum = minimum
+
     def is_satisfied_by(self, order):
         return order.units >= self.minimum
+
 
 class ActivePromotionSpec(Specification):
     def is_satisfied_by(self, order):
         return order.has_promotion
+
+
+class HasItemsSpec(Specification):
+    def is_satisfied_by(self, order):
+        return len(order.items) > 0
+
+
+class ActiveCustomerSpec(Specification):
+    def is_satisfied_by(self, order):
+        return order.customer.active
+
 
 # Regla de descuento de 10 %
 ten_percent = (
@@ -64,6 +90,10 @@ five_percent = MinimumAmountSpec(Decimal("5000")) & ~ActivePromotionSpec()
 
 # Ambas combinadas con OR
 any_discount = ten_percent | five_percent
+
+# Regla de pedido confirmable: tiene artículos y el cliente está activo
+confirmable = HasItemsSpec() & ActiveCustomerSpec()
+
 
 # Si ambas se cumplen, aplica primero 10 %
 def discount_rate(order):
