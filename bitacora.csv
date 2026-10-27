@@ -1,0 +1,16 @@
+﻿caso,pedido,estado_inicial,operacion,esperado,resultado_real,estado_final,eventos,pista
+E01,O001,DRAFT,evaluar_descuento,10%,"Descuento 10% (total 2100.00, 4 uds, VIP=True, promo=False)",DRAFT,ninguno,AND VIP + monto >500 + unidades >=4 + NOT promo
+E02,O002,DRAFT,evaluar_descuento,0%,"Descuento 0% (total 1050.00, 2 uds, VIP=False, promo=False)",DRAFT,ninguno,"No VIP, total menor a 5000"
+E03,O003,DRAFT,confirmar,rechazo,RECHAZADO InvalidOrderData: Requiere artículos y cliente activo,DRAFT,ninguno,Cliente inactivo
+E04,O005,DRAFT,evaluar_descuento,0%,"Descuento 0% (total 2100.00, 4 uds, VIP=True, promo=True)",DRAFT,ninguno,Promocion activa bloquea descuento
+E05,O006,DRAFT,evaluar_descuento,5%,"Descuento 5% (total 18000.00, 1 uds, VIP=False, promo=False)",DRAFT,ninguno,OR total >5000 y sin promocion
+E06,O007,DRAFT,confirmar,rechazo,RECHAZADO InvalidOrderData: Requiere artículos y cliente activo,DRAFT,ninguno,Pedido sin articulos
+E07,O008,DRAFT,confirmar,exito,ÉXITO: confirmado,CONFIRMED,['OrderConfirmed'],20 unidades permitidas
+E08,O009,DRAFT,agregar SKU003 x2,rechazo,RECHAZADO OrderItemLimitExceeded: Máximo 20 unidades,DRAFT,ninguno,21 unidades excede limite
+E09,O010,DRAFT,evaluar_descuento,0%,"Descuento 0% (total 500.00, 2 uds, VIP=False, promo=False)",DRAFT,ninguno,Umbral estricto >500
+E10,O011,DRAFT,evaluar_descuento,0%,"Descuento 0% (total 1500.00, 3 uds, VIP=True, promo=False)",DRAFT,ninguno,"Solo 3 unidades, requiere 4"
+E11,O012,DRAFT,confirmar y enviar sin guia,rechazo envio,RECHAZADO InvalidOrderData: Se requiere número de guía,CONFIRMED,['OrderConfirmed'],La confirmacion es valida pero falta guia
+E12,O013,DRAFT,confirmar dos veces,rechazo segunda,RECHAZADO InvalidOrderTransition: Solo DRAFT,CONFIRMED,['OrderConfirmed'],No permite confirmar desde CONFIRMED
+E13,O014,DRAFT,"confirmar, enviar y cancelar",rechazo cancelacion,RECHAZADO InvalidOrderTransition: Solo CONFIRMED,SHIPPED,"['OrderConfirmed', 'OrderShipped']",No permite cancelar desde SHIPPED
+E14,O015,DRAFT,"confirmar, enviar y devolver",exito,ÉXITO: devuelto,RETURNED,"['OrderConfirmed', 'OrderShipped', 'OrderReturned']",Termina en RETURNED
+E15,O016,DRAFT,"confirmar, enviar y entregar",exito,ÉXITO: entregado,DELIVERED,"['OrderConfirmed', 'OrderShipped', 'OrderDelivered']",Termina en DELIVERED
